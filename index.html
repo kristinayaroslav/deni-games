@@ -20,6 +20,8 @@ h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:
 .feedback{min-height:48px;margin:10px 0 0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:750}
 .action{display:none;min-height:54px;padding:12px 28px;border:0;border-radius:17px;background:var(--green);color:white;font:inherit;font-size:18px;font-weight:750;cursor:pointer;touch-action:manipulation}
 .action.visible{display:inline-flex;align-items:center;justify-content:center}
+.skip-stage{display:block;margin:4px auto 0;padding:10px 14px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;touch-action:manipulation}
+.skip-stage:focus-visible{outline:3px solid #6b9fc3;outline-offset:2px;border-radius:8px}
 .finish-mark{width:min(100%,440px);margin:0 auto 14px}.finish-mark img{display:block;width:100%;height:auto;border-radius:24px}
 .finish h1{margin-bottom:12px}.finish p{margin:0 0 20px;color:var(--muted);font-size:18px}
 .stage-card{padding:18px 0}
@@ -38,6 +40,7 @@ h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:
 <h1 id="prompt">Найди корабль</h1>
 <div class="cards" id="cards" aria-label="Выбери картинку"></div>
 <div class="feedback" id="feedback" aria-live="polite"></div>
+<button class="skip-stage" id="skipStage" type="button">Пропустить этап 1 →</button>
 </section>
 <section id="between" class="stage-card" hidden>
 <h1>Первый этап пройден!</h1>
@@ -66,12 +69,12 @@ const tasks=[
 ];
 const allVehicles=["ship","helicopter","dump_truck","train","tractor","excavator","airplane","bus","fire_engine","police_car","van","hot_air_balloon"];
 const game=document.getElementById("game"),between=document.getElementById("between"),finish=document.getElementById("finish");
-const progress=document.getElementById("progress"),prompt=document.getElementById("prompt"),cards=document.getElementById("cards"),feedback=document.getElementById("feedback");
+const progress=document.getElementById("progress"),prompt=document.getElementById("prompt"),cards=document.getElementById("cards"),feedback=document.getElementById("feedback"),skipStage=document.getElementById("skipStage");
 let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null;
 function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function optionsFor(task){if(stage===1)return shuffle(task.pair);const extras=shuffle(allVehicles.filter(v=>v!==task.answer&&!task.pair.includes(v))).slice(0,2);return shuffle([task.answer,...task.pair.filter(v=>v!==task.answer),...extras])}
 function renderTask(){
- const task=tasks[index];locked=false;clearTimeout(wrongTimer);clearTimeout(nextTimer);
+ const task=tasks[index];skipStage.hidden=stage!==1;locked=false;clearTimeout(wrongTimer);clearTimeout(nextTimer);
  progress.textContent=`Этап ${stage} · Задание ${index+1} из ${tasks.length}`;
  prompt.textContent=`Найди ${task.target}`;feedback.textContent="";
  cards.style.gridTemplateColumns="repeat(2,minmax(0,1fr))";cards.replaceChildren();
@@ -98,6 +101,7 @@ function choose(button,selected,answer){
  }
 }
 document.getElementById("startSecond").addEventListener("click",()=>{stage=2;index=0;between.hidden=true;game.hidden=false;renderTask()});
+skipStage.addEventListener("click",()=>{stage=2;index=0;game.hidden=false;between.hidden=true;renderTask()});
 document.getElementById("restart").addEventListener("click",()=>{stage=1;index=0;finish.hidden=true;game.hidden=false;renderTask()});
 renderTask();
 </script>
