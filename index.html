@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f1e5">
+<title>Найди транспорт</title>
+<style>
+  :root { --cream:#f8f1e5; --ink:#263238; --green:#4d8b65; --red:#c76c5b; }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; min-height:100vh; padding:22px 16px;
+    background:var(--cream); color:var(--ink);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    display:flex; justify-content:center; align-items:center;
+  }
+  main { width:min(100%,620px); text-align:center; }
+  .topline { font-size:14px; color:#7b7469; margin-bottom:14px; }
+  h1 { font-size:clamp(29px,7vw,42px); line-height:1.1; margin:0 0 28px; font-weight:800; }
+  .cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  button.card {
+    appearance:none; border:3px solid transparent; border-radius:22px;
+    padding:8px; background:#fffdf8; width:100%; min-width:0;
+    box-shadow:0 5px 16px #5b4a3214; cursor:pointer;
+    transition:transform .15s,border-color .15s,background .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  button.card:active { transform:scale(.97); }
+  button.card img { display:block; width:100%; aspect-ratio:1; object-fit:cover; border-radius:14px; }
+  button.card:focus-visible { outline:4px solid #6c9fc4; outline-offset:3px; }
+  button.card.correct { border-color:var(--green); background:#e9f4e9; }
+  button.card.wrong { border-color:var(--red); background:#fff0eb; }
+  .feedback { min-height:58px; margin:20px 0 4px; font-size:20px; font-weight:750; }
+  .next {
+    display:none; border:0; border-radius:18px; padding:15px 28px;
+    background:var(--green); color:white; font-size:19px; font-weight:750;
+    cursor:pointer; min-height:54px;
+  }
+  .next.show { display:inline-block; }
+  @media (max-width:380px) { body{padding:16px 12px} .cards{gap:9px} button.card{padding:6px;border-radius:17px} }
+  @media (prefers-reduced-motion:reduce) { *{transition:none!important} }
+</style>
+</head>
+<body>
+<main>
+  <div class="topline">Задание 1 из 10</div>
+  <h1>Найди корабль</h1>
+  <section class="cards" aria-label="Выбери картинку">
+    <button class="card" data-answer="ship" aria-label="Первая картинка">
+      <img src="assets/ship.jpg" alt="">
+    </button>
+    <button class="card" data-answer="helicopter" aria-label="Вторая картинка">
+      <img src="assets/helicopter.jpg" alt="">
+    </button>
+  </section>
+  <div class="feedback" aria-live="polite"></div>
+  <button class="next" type="button">Ещё задание</button>
+</main>
+<script>
+  const cards = [...document.querySelectorAll('.card')];
+  const feedback = document.querySelector('.feedback');
+  const next = document.querySelector('.next');
+  cards.forEach(card => card.addEventListener('click', () => {
+    if (next.classList.contains('show')) return;
+    if (card.dataset.answer === 'ship') {
+      card.classList.add('correct');
+      feedback.textContent = 'Правильно!';
+      next.classList.add('show');
+    } else {
+      card.classList.add('wrong');
+      feedback.textContent = 'Попробуй ещё раз';
+      window.setTimeout(() => card.classList.remove('wrong'), 450);
+    }
+  }));
+  next.addEventListener('click', () => {
+    feedback.textContent = 'Первое задание пройдено!';
+    next.textContent = 'Готово';
+    next.disabled = true;
+  });
+</script>
+</body>
+</html>
