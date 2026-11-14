@@ -1,290 +1,105 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f8f1e5">
-  <meta name="description" content="Простая игра для малыша: найди нужный транспорт по слову взрослого.">
-  <title>Найди транспорт</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --cream: #f8f1e5;
-      --ink: #29343a;
-      --muted: #81796e;
-      --green: #4d8b65;
-      --green-bg: #eaf3e9;
-      --red: #c76c5b;
-      --red-bg: #fff0eb;
-      --card: #fffdf8;
-    }
-    * { box-sizing: border-box; }
-    html { min-height: 100%; }
-    body {
-      margin: 0;
-      min-height: 100svh;
-      padding: max(16px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--cream);
-      color: var(--ink);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    main { width: min(100%, 620px); text-align: center; }
-    .topline {
-      min-height: 22px;
-      margin: 0 0 13px;
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: .02em;
-    }
-    h1 {
-      margin: 0 0 clamp(20px, 5vh, 34px);
-      font-size: clamp(30px, 8vw, 44px);
-      line-height: 1.08;
-      font-weight: 800;
-      letter-spacing: -.035em;
-    }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(9px, 2.5vw, 16px);
-    }
-    .card {
-      appearance: none;
-      display: block;
-      width: 100%;
-      min-width: 0;
-      padding: clamp(6px, 1.5vw, 10px);
-      border: 4px solid transparent;
-      border-radius: 24px;
-      background: var(--card);
-      box-shadow: 0 5px 18px rgb(70 55 35 / 8%);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      transition: border-color .14s ease, background-color .14s ease, transform .14s ease;
-    }
-    .card:active:not(:disabled) { transform: scale(.975); }
-    .card img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: contain;
-      border-radius: 15px;
-      background: var(--cream);
-    }
-    .card:focus-visible, .action:focus-visible {
-      outline: 4px solid #6b9fc3;
-      outline-offset: 4px;
-    }
-    .card.correct {
-      border-color: var(--green);
-      background: var(--green-bg);
-    }
-    .card.wrong {
-      border-color: var(--red);
-      background: var(--red-bg);
-      animation: nudge .22s ease-in-out;
-    }
-    .card:disabled { cursor: default; }
-    .feedback {
-      min-height: 58px;
-      margin: 17px 0 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(18px, 5vw, 21px);
-      line-height: 1.25;
-      font-weight: 750;
-    }
-    .action {
-      display: none;
-      min-height: 56px;
-      padding: 13px 30px;
-      border: 0;
-      border-radius: 18px;
-      background: var(--green);
-      color: white;
-      font: inherit;
-      font-size: 19px;
-      font-weight: 750;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    .action.visible { display: inline-flex; align-items: center; justify-content: center; }
-    .finish-mark {
-      width: 88px;
-      height: 88px;
-      margin: 0 auto 20px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--green-bg);
-      color: var(--green);
-      font-size: 48px;
-      font-weight: 800;
-    }
-    .finish h1 { margin-bottom: 14px; }
-    .finish p {
-      margin: 0 0 28px;
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.4;
-    }
-    [hidden] { display: none !important; }
-    @keyframes nudge {
-      0%, 100% { transform: translateX(0); }
-      30% { transform: translateX(-4px); }
-      70% { transform: translateX(4px); }
-    }
-    @media (max-width: 380px) {
-      body { padding-left: 10px; padding-right: 10px; }
-      .card { border-radius: 18px; }
-      .card img { border-radius: 11px; }
-    }
-    @media (max-height: 620px) {
-      body { align-items: flex-start; }
-      main { margin: auto 0; }
-      h1 { margin-bottom: 16px; font-size: clamp(27px, 7vw, 36px); }
-      .card img { max-height: 38svh; }
-      .feedback { min-height: 48px; margin-top: 10px; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f1e5">
+<title>Найди транспорт</title>
+<style>
+:root{color-scheme:light;--cream:#f8f1e5;--ink:#29343a;--muted:#81796e;--green:#4d9a68;--green-bg:#eaf5e9;--red:#c76c5b;--red-bg:#fff0eb;--card:#fffdf8}
+*{box-sizing:border-box}body{margin:0;min-height:100svh;padding:max(12px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+main{width:min(100%,620px);text-align:center}.topline{margin:0 0 10px;color:var(--muted);font-size:14px;font-weight:650}
+h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:1.08;font-weight:800;letter-spacing:-.035em}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(8px,2vw,14px)}
+.card{appearance:none;display:block;width:100%;min-width:0;padding:clamp(4px,1vw,8px);border:4px solid transparent;border-radius:20px;background:var(--card);box-shadow:0 5px 18px rgb(70 55 35 / 8%);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:border-color .16s,background-color .16s,transform .16s}
+.card:active:not(:disabled){transform:scale(.975)}.card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;border-radius:13px;background:#fffaf1}
+.card:focus-visible,.action:focus-visible{outline:4px solid #6b9fc3;outline-offset:3px}
+.card.correct{border-color:var(--green);background:var(--green-bg);animation:celebrate .9s ease both;box-shadow:0 0 0 5px #b9dfbd,0 0 25px #82c88a}
+.card.wrong{border-color:var(--red);background:var(--red-bg);animation:nudge .22s ease-in-out}
+.card:disabled{cursor:default}
+.feedback{min-height:48px;margin:10px 0 0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:750}
+.action{display:none;min-height:54px;padding:12px 28px;border:0;border-radius:17px;background:var(--green);color:white;font:inherit;font-size:18px;font-weight:750;cursor:pointer;touch-action:manipulation}
+.action.visible{display:inline-flex;align-items:center;justify-content:center}
+.finish-mark{width:min(100%,440px);margin:0 auto 14px}.finish-mark img{display:block;width:100%;height:auto;border-radius:24px}
+.finish h1{margin-bottom:12px}.finish p{margin:0 0 20px;color:var(--muted);font-size:18px}
+.stage-card{padding:18px 0}
+[hidden]{display:none!important}
+@keyframes nudge{0%,100%{transform:translateX(0)}30%{transform:translateX(-4px)}70%{transform:translateX(4px)}}
+@keyframes celebrate{0%{transform:scale(1)}35%{transform:scale(1.055)}65%{transform:scale(1.025)}100%{transform:scale(1)}}
+@media(max-width:380px){body{padding-left:9px;padding-right:9px}.card{border-radius:16px}.card img{border-radius:10px}}
+@media(max-height:650px){body{align-items:flex-start}main{margin:auto 0}h1{margin-bottom:12px;font-size:clamp(26px,6.5vw,34px)}.card img{max-height:34svh}.feedback{min-height:38px;margin-top:6px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-  <main>
-    <section id="game" aria-labelledby="prompt">
-      <div class="topline" id="progress">Задание 1 из 10</div>
-      <h1 id="prompt">Найди корабль</h1>
-      <div class="cards" id="cards" aria-label="Выбери одну из двух картинок">
-        <button class="card" type="button" aria-label="Первая картинка">
-          <img src="ship.jpg" alt="">
-        </button>
-        <button class="card" type="button" aria-label="Вторая картинка">
-          <img src="helicopter.jpg" alt="">
-        </button>
-      </div>
-      <div class="feedback" id="feedback" aria-live="polite"></div>
-      <button class="action" id="next" type="button">Следующее</button>
-    </section>
-
-    <section class="finish" id="finish" aria-labelledby="finish-title" hidden>
-      <div class="finish-mark" aria-hidden="true">✓</div>
-      <h1 id="finish-title">Все задания выполнены!</h1>
-      <p>Можно сыграть ещё раз.</p>
-      <button class="action visible" id="restart" type="button">Начать заново</button>
-    </section>
-  </main>
-
-  <script>
-    const tasks = [
-      { target: "корабль", answer: "ship", pair: ["ship", "helicopter"] },
-      { target: "самосвал", answer: "dump_truck", pair: ["hot_air_balloon", "dump_truck"] },
-      { target: "поезд", answer: "train", pair: ["train", "tractor"] },
-      { target: "самолёт", answer: "airplane", pair: ["excavator", "airplane"] },
-      { target: "автобус", answer: "bus", pair: ["bus", "fire_engine"] },
-      { target: "полицейскую машину", answer: "police_car", pair: ["ship", "police_car"] },
-      { target: "фургон", answer: "van", pair: ["helicopter", "van"] },
-      { target: "трактор", answer: "tractor", pair: ["hot_air_balloon", "tractor"] },
-      { target: "пожарную машину", answer: "fire_engine", pair: ["fire_engine", "train"] },
-      { target: "экскаватор", answer: "excavator", pair: ["bus", "excavator"] }
-    ];
-
-    const game = document.getElementById("game");
-    const finish = document.getElementById("finish");
-    const progress = document.getElementById("progress");
-    const prompt = document.getElementById("prompt");
-    const cardsBox = document.getElementById("cards");
-    const feedback = document.getElementById("feedback");
-    const nextButton = document.getElementById("next");
-    const restartButton = document.getElementById("restart");
-
-    let taskIndex = 0;
-    let locked = false;
-    let wrongTimer = null;
-
-    function shuffledPair(pair) {
-      const copy = [...pair];
-      if (Math.random() < 0.5) copy.reverse();
-      return copy;
-    }
-
-    function renderTask() {
-      const task = tasks[taskIndex];
-      locked = false;
-      clearTimeout(wrongTimer);
-      progress.textContent = `Задание ${taskIndex + 1} из ${tasks.length}`;
-      prompt.textContent = `Найди ${task.target}`;
-      feedback.textContent = "";
-      nextButton.classList.remove("visible");
-      cardsBox.replaceChildren();
-
-      shuffledPair(task.pair).forEach((vehicle, index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "card";
-        button.setAttribute("aria-label", index === 0 ? "Первая картинка" : "Вторая картинка");
-
-        const img = document.createElement("img");
-        img.src = `${vehicle}.jpg`;
-        img.alt = "";
-        img.loading = "eager";
-        img.decoding = "async";
-        button.appendChild(img);
-        button.addEventListener("click", () => choose(button, vehicle, task.answer));
-        cardsBox.appendChild(button);
-      });
-    }
-
-    function choose(button, selected, answer) {
-      if (locked) return;
-
-      if (selected === answer) {
-        locked = true;
-        clearTimeout(wrongTimer);
-        button.classList.remove("wrong");
-        button.classList.add("correct");
-        cardsBox.querySelectorAll("button").forEach(card => { card.disabled = true; });
-        feedback.textContent = "Правильно!";
-        nextButton.textContent = taskIndex === tasks.length - 1 ? "Готово" : "Следующее";
-        nextButton.classList.add("visible");
-      } else {
-        button.classList.remove("wrong");
-        void button.offsetWidth;
-        button.classList.add("wrong");
-        feedback.textContent = "Попробуй ещё раз";
-        clearTimeout(wrongTimer);
-        wrongTimer = setTimeout(() => button.classList.remove("wrong"), 500);
-      }
-    }
-
-    nextButton.addEventListener("click", () => {
-      if (!locked) return;
-      if (taskIndex < tasks.length - 1) {
-        taskIndex += 1;
-        renderTask();
-      } else {
-        game.hidden = true;
-        finish.hidden = false;
-        restartButton.focus();
-      }
-    });
-
-    restartButton.addEventListener("click", () => {
-      taskIndex = 0;
-      finish.hidden = true;
-      game.hidden = false;
-      renderTask();
-    });
-
-    renderTask();
-  </script>
+<main>
+<section id="game" aria-labelledby="prompt">
+<div class="topline" id="progress">Этап 1 · Задание 1 из 10</div>
+<h1 id="prompt">Найди корабль</h1>
+<div class="cards" id="cards" aria-label="Выбери картинку"></div>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+</section>
+<section id="between" class="stage-card" hidden>
+<h1>Первый этап пройден!</h1>
+<p>А теперь попробуем найти транспорт среди четырёх картинок.</p>
+<button class="action visible" id="startSecond" type="button">Начать второй этап</button>
+</section>
+<section class="finish" id="finish" hidden>
+<div class="finish-mark"><img src="animal_applause.svg" alt="Медведь, зайчик и лисёнок хлопают"></div>
+<h1>Ура! Ты всё нашёл!</h1>
+<p>Зверята аплодируют тебе!</p>
+<button class="action visible" id="restart" type="button">Сыграть ещё</button>
+</section>
+</main>
+<script>
+const tasks=[
+{target:"корабль",answer:"ship",pair:["ship","helicopter"]},
+{target:"самосвал",answer:"dump_truck",pair:["hot_air_balloon","dump_truck"]},
+{target:"поезд",answer:"train",pair:["train","tractor"]},
+{target:"самолёт",answer:"airplane",pair:["excavator","airplane"]},
+{target:"автобус",answer:"bus",pair:["bus","fire_engine"]},
+{target:"полицейскую машину",answer:"police_car",pair:["ship","police_car"]},
+{target:"фургон",answer:"van",pair:["helicopter","van"]},
+{target:"трактор",answer:"tractor",pair:["hot_air_balloon","tractor"]},
+{target:"пожарную машину",answer:"fire_engine",pair:["fire_engine","train"]},
+{target:"экскаватор",answer:"excavator",pair:["bus","excavator"]}
+];
+const allVehicles=["ship","helicopter","dump_truck","train","tractor","excavator","airplane","bus","fire_engine","police_car","van","hot_air_balloon"];
+const game=document.getElementById("game"),between=document.getElementById("between"),finish=document.getElementById("finish");
+const progress=document.getElementById("progress"),prompt=document.getElementById("prompt"),cards=document.getElementById("cards"),feedback=document.getElementById("feedback");
+let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null;
+function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function optionsFor(task){if(stage===1)return shuffle(task.pair);const extras=shuffle(allVehicles.filter(v=>v!==task.answer&&!task.pair.includes(v))).slice(0,2);return shuffle([task.answer,...task.pair.filter(v=>v!==task.answer),...extras])}
+function renderTask(){
+ const task=tasks[index];locked=false;clearTimeout(wrongTimer);clearTimeout(nextTimer);
+ progress.textContent=`Этап ${stage} · Задание ${index+1} из ${tasks.length}`;
+ prompt.textContent=`Найди ${task.target}`;feedback.textContent="";
+ cards.style.gridTemplateColumns="repeat(2,minmax(0,1fr))";cards.replaceChildren();
+ cards.setAttribute("aria-label",stage===1?"Две картинки":"Четыре картинки");
+ optionsFor(task).forEach((vehicle,i)=>{
+  const b=document.createElement("button");b.type="button";b.className="card";b.setAttribute("aria-label",`Картинка ${i+1}`);
+  const img=document.createElement("img");img.src=vehicle+".jpg";img.alt="";img.loading="eager";img.decoding="async";
+  b.appendChild(img);b.addEventListener("click",()=>choose(b,vehicle,task.answer));cards.appendChild(b);
+ });
+}
+function choose(button,selected,answer){
+ if(locked)return;
+ if(selected===answer){
+  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");
+  cards.querySelectorAll("button").forEach(b=>b.disabled=true);feedback.textContent="Правильно!";
+  nextTimer=setTimeout(()=>{
+   if(index<tasks.length-1){index++;renderTask()}
+   else if(stage===1){game.hidden=true;between.hidden=false}
+   else{game.hidden=true;finish.hidden=false}
+  },1000);
+ }else{
+  button.classList.remove("wrong");void button.offsetWidth;button.classList.add("wrong");feedback.textContent="Попробуй ещё раз";
+  clearTimeout(wrongTimer);wrongTimer=setTimeout(()=>button.classList.remove("wrong"),500);
+ }
+}
+document.getElementById("startSecond").addEventListener("click",()=>{stage=2;index=0;between.hidden=true;game.hidden=false;renderTask()});
+document.getElementById("restart").addEventListener("click",()=>{stage=1;index=0;finish.hidden=true;game.hidden=false;renderTask()});
+renderTask();
+</script>
 </body>
 </html>
