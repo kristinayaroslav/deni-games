@@ -1,82 +1,290 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f8f1e5">
-<title>Найди транспорт</title>
-<style>
-  :root { --cream:#f8f1e5; --ink:#263238; --green:#4d8b65; --red:#c76c5b; }
-  * { box-sizing:border-box; }
-  body {
-    margin:0; min-height:100vh; padding:22px 16px;
-    background:var(--cream); color:var(--ink);
-    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    display:flex; justify-content:center; align-items:center;
-  }
-  main { width:min(100%,620px); text-align:center; }
-  .topline { font-size:14px; color:#7b7469; margin-bottom:14px; }
-  h1 { font-size:clamp(29px,7vw,42px); line-height:1.1; margin:0 0 28px; font-weight:800; }
-  .cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  button.card {
-    appearance:none; border:3px solid transparent; border-radius:22px;
-    padding:8px; background:#fffdf8; width:100%; min-width:0;
-    box-shadow:0 5px 16px #5b4a3214; cursor:pointer;
-    transition:transform .15s,border-color .15s,background .15s;
-    -webkit-tap-highlight-color:transparent;
-  }
-  button.card:active { transform:scale(.97); }
-  button.card img { display:block; width:100%; aspect-ratio:1; object-fit:cover; border-radius:14px; }
-  button.card:focus-visible { outline:4px solid #6c9fc4; outline-offset:3px; }
-  button.card.correct { border-color:var(--green); background:#e9f4e9; }
-  button.card.wrong { border-color:var(--red); background:#fff0eb; }
-  .feedback { min-height:58px; margin:20px 0 4px; font-size:20px; font-weight:750; }
-  .next {
-    display:none; border:0; border-radius:18px; padding:15px 28px;
-    background:var(--green); color:white; font-size:19px; font-weight:750;
-    cursor:pointer; min-height:54px;
-  }
-  .next.show { display:inline-block; }
-  @media (max-width:380px) { body{padding:16px 12px} .cards{gap:9px} button.card{padding:6px;border-radius:17px} }
-  @media (prefers-reduced-motion:reduce) { *{transition:none!important} }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f1e5">
+  <meta name="description" content="Простая игра для малыша: найди нужный транспорт по слову взрослого.">
+  <title>Найди транспорт</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --cream: #f8f1e5;
+      --ink: #29343a;
+      --muted: #81796e;
+      --green: #4d8b65;
+      --green-bg: #eaf3e9;
+      --red: #c76c5b;
+      --red-bg: #fff0eb;
+      --card: #fffdf8;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      padding: max(16px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    main { width: min(100%, 620px); text-align: center; }
+    .topline {
+      min-height: 22px;
+      margin: 0 0 13px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+    h1 {
+      margin: 0 0 clamp(20px, 5vh, 34px);
+      font-size: clamp(30px, 8vw, 44px);
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -.035em;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(9px, 2.5vw, 16px);
+    }
+    .card {
+      appearance: none;
+      display: block;
+      width: 100%;
+      min-width: 0;
+      padding: clamp(6px, 1.5vw, 10px);
+      border: 4px solid transparent;
+      border-radius: 24px;
+      background: var(--card);
+      box-shadow: 0 5px 18px rgb(70 55 35 / 8%);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: border-color .14s ease, background-color .14s ease, transform .14s ease;
+    }
+    .card:active:not(:disabled) { transform: scale(.975); }
+    .card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: contain;
+      border-radius: 15px;
+      background: var(--cream);
+    }
+    .card:focus-visible, .action:focus-visible {
+      outline: 4px solid #6b9fc3;
+      outline-offset: 4px;
+    }
+    .card.correct {
+      border-color: var(--green);
+      background: var(--green-bg);
+    }
+    .card.wrong {
+      border-color: var(--red);
+      background: var(--red-bg);
+      animation: nudge .22s ease-in-out;
+    }
+    .card:disabled { cursor: default; }
+    .feedback {
+      min-height: 58px;
+      margin: 17px 0 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 5vw, 21px);
+      line-height: 1.25;
+      font-weight: 750;
+    }
+    .action {
+      display: none;
+      min-height: 56px;
+      padding: 13px 30px;
+      border: 0;
+      border-radius: 18px;
+      background: var(--green);
+      color: white;
+      font: inherit;
+      font-size: 19px;
+      font-weight: 750;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .action.visible { display: inline-flex; align-items: center; justify-content: center; }
+    .finish-mark {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green-bg);
+      color: var(--green);
+      font-size: 48px;
+      font-weight: 800;
+    }
+    .finish h1 { margin-bottom: 14px; }
+    .finish p {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.4;
+    }
+    [hidden] { display: none !important; }
+    @keyframes nudge {
+      0%, 100% { transform: translateX(0); }
+      30% { transform: translateX(-4px); }
+      70% { transform: translateX(4px); }
+    }
+    @media (max-width: 380px) {
+      body { padding-left: 10px; padding-right: 10px; }
+      .card { border-radius: 18px; }
+      .card img { border-radius: 11px; }
+    }
+    @media (max-height: 620px) {
+      body { align-items: flex-start; }
+      main { margin: auto 0; }
+      h1 { margin-bottom: 16px; font-size: clamp(27px, 7vw, 36px); }
+      .card img { max-height: 38svh; }
+      .feedback { min-height: 48px; margin-top: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
-<main>
-  <div class="topline">Задание 1 из 10</div>
-  <h1>Найди корабль</h1>
-  <section class="cards" aria-label="Выбери картинку">
-    <button class="card" data-answer="ship" aria-label="Первая картинка">
-      <img src="assets/ship.jpg" alt="">
-    </button>
-    <button class="card" data-answer="helicopter" aria-label="Вторая картинка">
-      <img src="assets/helicopter.jpg" alt="">
-    </button>
-  </section>
-  <div class="feedback" aria-live="polite"></div>
-  <button class="next" type="button">Ещё задание</button>
-</main>
-<script>
-  const cards = [...document.querySelectorAll('.card')];
-  const feedback = document.querySelector('.feedback');
-  const next = document.querySelector('.next');
-  cards.forEach(card => card.addEventListener('click', () => {
-    if (next.classList.contains('show')) return;
-    if (card.dataset.answer === 'ship') {
-      card.classList.add('correct');
-      feedback.textContent = 'Правильно!';
-      next.classList.add('show');
-    } else {
-      card.classList.add('wrong');
-      feedback.textContent = 'Попробуй ещё раз';
-      window.setTimeout(() => card.classList.remove('wrong'), 450);
+  <main>
+    <section id="game" aria-labelledby="prompt">
+      <div class="topline" id="progress">Задание 1 из 10</div>
+      <h1 id="prompt">Найди корабль</h1>
+      <div class="cards" id="cards" aria-label="Выбери одну из двух картинок">
+        <button class="card" type="button" aria-label="Первая картинка">
+          <img src="ship.jpg" alt="">
+        </button>
+        <button class="card" type="button" aria-label="Вторая картинка">
+          <img src="helicopter.jpg" alt="">
+        </button>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <button class="action" id="next" type="button">Следующее</button>
+    </section>
+
+    <section class="finish" id="finish" aria-labelledby="finish-title" hidden>
+      <div class="finish-mark" aria-hidden="true">✓</div>
+      <h1 id="finish-title">Все задания выполнены!</h1>
+      <p>Можно сыграть ещё раз.</p>
+      <button class="action visible" id="restart" type="button">Начать заново</button>
+    </section>
+  </main>
+
+  <script>
+    const tasks = [
+      { target: "корабль", answer: "ship", pair: ["ship", "helicopter"] },
+      { target: "самосвал", answer: "dump_truck", pair: ["hot_air_balloon", "dump_truck"] },
+      { target: "поезд", answer: "train", pair: ["train", "tractor"] },
+      { target: "самолёт", answer: "airplane", pair: ["excavator", "airplane"] },
+      { target: "автобус", answer: "bus", pair: ["bus", "fire_engine"] },
+      { target: "полицейскую машину", answer: "police_car", pair: ["ship", "police_car"] },
+      { target: "фургон", answer: "van", pair: ["helicopter", "van"] },
+      { target: "трактор", answer: "tractor", pair: ["hot_air_balloon", "tractor"] },
+      { target: "пожарную машину", answer: "fire_engine", pair: ["fire_engine", "train"] },
+      { target: "экскаватор", answer: "excavator", pair: ["bus", "excavator"] }
+    ];
+
+    const game = document.getElementById("game");
+    const finish = document.getElementById("finish");
+    const progress = document.getElementById("progress");
+    const prompt = document.getElementById("prompt");
+    const cardsBox = document.getElementById("cards");
+    const feedback = document.getElementById("feedback");
+    const nextButton = document.getElementById("next");
+    const restartButton = document.getElementById("restart");
+
+    let taskIndex = 0;
+    let locked = false;
+    let wrongTimer = null;
+
+    function shuffledPair(pair) {
+      const copy = [...pair];
+      if (Math.random() < 0.5) copy.reverse();
+      return copy;
     }
-  }));
-  next.addEventListener('click', () => {
-    feedback.textContent = 'Первое задание пройдено!';
-    next.textContent = 'Готово';
-    next.disabled = true;
-  });
-</script>
+
+    function renderTask() {
+      const task = tasks[taskIndex];
+      locked = false;
+      clearTimeout(wrongTimer);
+      progress.textContent = `Задание ${taskIndex + 1} из ${tasks.length}`;
+      prompt.textContent = `Найди ${task.target}`;
+      feedback.textContent = "";
+      nextButton.classList.remove("visible");
+      cardsBox.replaceChildren();
+
+      shuffledPair(task.pair).forEach((vehicle, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "card";
+        button.setAttribute("aria-label", index === 0 ? "Первая картинка" : "Вторая картинка");
+
+        const img = document.createElement("img");
+        img.src = `${vehicle}.jpg`;
+        img.alt = "";
+        img.loading = "eager";
+        img.decoding = "async";
+        button.appendChild(img);
+        button.addEventListener("click", () => choose(button, vehicle, task.answer));
+        cardsBox.appendChild(button);
+      });
+    }
+
+    function choose(button, selected, answer) {
+      if (locked) return;
+
+      if (selected === answer) {
+        locked = true;
+        clearTimeout(wrongTimer);
+        button.classList.remove("wrong");
+        button.classList.add("correct");
+        cardsBox.querySelectorAll("button").forEach(card => { card.disabled = true; });
+        feedback.textContent = "Правильно!";
+        nextButton.textContent = taskIndex === tasks.length - 1 ? "Готово" : "Следующее";
+        nextButton.classList.add("visible");
+      } else {
+        button.classList.remove("wrong");
+        void button.offsetWidth;
+        button.classList.add("wrong");
+        feedback.textContent = "Попробуй ещё раз";
+        clearTimeout(wrongTimer);
+        wrongTimer = setTimeout(() => button.classList.remove("wrong"), 500);
+      }
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (!locked) return;
+      if (taskIndex < tasks.length - 1) {
+        taskIndex += 1;
+        renderTask();
+      } else {
+        game.hidden = true;
+        finish.hidden = false;
+        restartButton.focus();
+      }
+    });
+
+    restartButton.addEventListener("click", () => {
+      taskIndex = 0;
+      finish.hidden = true;
+      game.hidden = false;
+      renderTask();
+    });
+
+    renderTask();
+  </script>
 </body>
 </html>
