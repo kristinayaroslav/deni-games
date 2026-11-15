@@ -8,7 +8,7 @@
 <style>
 :root{color-scheme:light;--cream:#f8f1e5;--ink:#29343a;--muted:#81796e;--green:#4d9a68;--green-bg:#eaf5e9;--red:#c76c5b;--red-bg:#fff0eb;--card:#fffdf8}
 *{box-sizing:border-box}body{margin:0;min-height:100svh;padding:max(12px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-main{width:min(100%,620px);text-align:center}.topline{margin:0 0 10px;color:var(--muted);font-size:14px;font-weight:650}
+main{width:min(100%,620px);text-align:center}.topline{margin:0 0 10px;color:var(--muted);font-size:14px;font-weight:650}.sound-toggle{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px;padding:9px 14px;border:1px solid #d8cdbb;border-radius:14px;background:#fffaf1;color:#665d52;font:inherit;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation}.sound-toggle[aria-pressed="true"]{background:#eaf5e9;border-color:#8fbd95;color:#326b42}
 h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:1.08;font-weight:800;letter-spacing:-.035em}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(8px,2vw,14px)}
 .card{appearance:none;display:block;width:100%;min-width:0;padding:clamp(4px,1vw,8px);border:4px solid transparent;border-radius:20px;background:var(--card);box-shadow:0 5px 18px rgb(70 55 35 / 8%);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:border-color .16s,background-color .16s,transform .16s}
@@ -37,6 +37,7 @@ h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:
 <main>
 <section id="game" aria-labelledby="prompt">
 <div class="topline" id="progress">Этап 1 · Задание 1 из 10</div>
+<button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">🔇 Включить звук</button>
 <h1 id="prompt">Найди корабль</h1>
 <details class="test-tools"><summary>Проверка для взрослого</summary><div class="test-controls"><button class="skip-stage" id="skipStage" type="button">Перейти к этапу 2</button><button class="skip-stage" id="skipFinish" type="button">Сразу к финалу с GIF</button></div></details>
 <div class="cards" id="cards" aria-label="Выбери картинку"></div>
@@ -70,32 +71,55 @@ const tasks=[
 const allVehicles=["ship","helicopter","dump_truck","train","tractor","excavator","airplane","bus","fire_engine","police_car","van","hot_air_balloon"];
 const game=document.getElementById("game"),between=document.getElementById("between"),finish=document.getElementById("finish");
 const progress=document.getElementById("progress"),prompt=document.getElementById("prompt"),cards=document.getElementById("cards"),feedback=document.getElementById("feedback"),skipStage=document.getElementById("skipStage"),skipFinish=document.getElementById("skipFinish");
-let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null,audioCtx=null;
-async function playVehicleSound(vehicle){
+let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null,audioCtx=null,soundEnabled=false;
+const soundToggle=document.getElementById("soundToggle");
+function getAudioContext(){
+ const Ctx=window.AudioContext||window.webkitAudioContext;
+ if(!Ctx)throw new Error("Web Audio API недоступен в этом браузере");
+ if(!audioCtx)audioCtx=new Ctx();
+ return audioCtx;
+}
+function beepTest(){
+ const ctx=getAudioContext(),osc=ctx.createOscillator(),gain=ctx.createGain(),t=ctx.currentTime;
+ osc.type="sine";osc.frequency.setValueAtTime(660,t);osc.frequency.setValueAtTime(880,t+.13);
+ gain.gain.setValueAtTime(.001,t);gain.gain.linearRampToValueAtTime(.22,t+.025);gain.gain.setValueAtTime(.22,t+.22);gain.gain.linearRampToValueAtTime(.001,t+.28);
+ osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+.3);
+}
+soundToggle.addEventListener("click",async()=>{
  try{
-  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
-  if(!audioCtx)audioCtx=new Ctx();
-  if(audioCtx.state!=="running")await audioCtx.resume();
-  const now=audioCtx.currentTime;
-  function tone(freq,start,duration,wave="sine",endFreq=null,gain=.12){
-   const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=wave;
-   o.frequency.setValueAtTime(freq,now+start);if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,now+start+duration);
-   g.gain.setValueAtTime(.001,now+start);g.gain.exponentialRampToValueAtTime(gain,now+start+.025);g.gain.exponentialRampToValueAtTime(.001,now+start+duration);
-   o.connect(g);g.connect(audioCtx.destination);o.start(now+start);o.stop(now+start+duration+.03);
+  const ctx=getAudioContext();
+  await ctx.resume();
+  soundEnabled=true;soundToggle.setAttribute("aria-pressed","true");soundToggle.textContent="🔊 Звук включён";
+  beepTest();
+ }catch(error){
+  soundToggle.textContent="Звук недоступен в браузере";
+  soundToggle.setAttribute("aria-pressed","false");
+  console.error("Не удалось включить звук:",error);
+ }
+});
+function playVehicleSound(vehicle){
+ if(!soundEnabled||!audioCtx||audioCtx.state!=="running")return;
+ try{
+  const ctx=audioCtx,now=ctx.currentTime;
+  function tone(freq,start,duration,wave="sine",endFreq=null,gain=.16){
+   const osc=ctx.createOscillator(),amp=ctx.createGain();osc.type=wave;
+   osc.frequency.setValueAtTime(freq,now+start);if(endFreq)osc.frequency.exponentialRampToValueAtTime(endFreq,now+start+duration);
+   amp.gain.setValueAtTime(.001,now+start);amp.gain.linearRampToValueAtTime(gain,now+start+.025);amp.gain.setValueAtTime(gain,now+start+Math.max(.03,duration-.04));amp.gain.linearRampToValueAtTime(.001,now+start+duration);
+   osc.connect(amp);amp.connect(ctx.destination);osc.start(now+start);osc.stop(now+start+duration+.03);
   }
-  const beep=(freq,start,d=.16)=>tone(freq,start,d,"square",null,.07);
+  const beep=(freq,start,d=.16)=>tone(freq,start,d,"square",null,.12);
   switch(vehicle){
-   case "airplane": tone(520,0,.75,"sawtooth",210,.045);break;
-   case "bus": case "van": beep(740,0,.13);beep(740,.22,.13);break;
-   case "train": tone(620,0,.22,"sawtooth",480,.09);tone(620,.32,.22,"sawtooth",480,.09);break;
-   case "helicopter": for(let i=0;i<5;i++)tone(170,i*.12,.09,"square",125,.055);break;
-   case "ship": tone(190,0,.85,"triangle",145,.16);break;
-   case "fire_engine": case "police_car": tone(620,0,.24,"sawtooth",880,.08);tone(880,.26,.24,"sawtooth",620,.08);tone(620,.52,.24,"sawtooth",880,.08);break;
-   case "dump_truck": case "tractor": tone(115,0,.5,"sawtooth",85,.12);beep(680,.58,.12);beep(680,.78,.12);break;
-   case "excavator": tone(130,0,.32,"sawtooth",100,.1);tone(180,.38,.2,"square",140,.055);break;
-   case "hot_air_balloon": tone(480,0,.5,"sine",700,.06);break;
+   case "airplane":tone(520,0,.75,"sawtooth",210,.09);break;
+   case "bus":case "van":beep(740,0,.13);beep(740,.22,.13);break;
+   case "train":tone(620,0,.22,"sawtooth",480,.14);tone(620,.32,.22,"sawtooth",480,.14);break;
+   case "helicopter":for(let i=0;i<5;i++)tone(170,i*.12,.09,"square",125,.09);break;
+   case "ship":tone(190,0,.85,"triangle",145,.2);break;
+   case "fire_engine":case "police_car":tone(620,0,.24,"sawtooth",880,.13);tone(880,.26,.24,"sawtooth",620,.13);tone(620,.52,.24,"sawtooth",880,.13);break;
+   case "dump_truck":case "tractor":tone(115,0,.5,"sawtooth",85,.18);beep(680,.58,.12);beep(680,.78,.12);break;
+   case "excavator":tone(130,0,.32,"sawtooth",100,.16);tone(180,.38,.2,"square",140,.1);break;
+   case "hot_air_balloon":tone(480,0,.5,"sine",700,.1);break;
   }
- }catch(e){}
+ }catch(error){console.error("Ошибка звука транспорта:",error);}
 }
 function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function optionsFor(task){if(stage===1)return shuffle(task.pair);const extras=shuffle(allVehicles.filter(v=>v!==task.answer&&!task.pair.includes(v))).slice(0,2);return shuffle([task.answer,...task.pair.filter(v=>v!==task.answer),...extras])}
@@ -114,7 +138,7 @@ function renderTask(){
 function choose(button,selected,answer){
  if(locked)return;
  if(selected===answer){
-  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");void playVehicleSound(selected);
+  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");playVehicleSound(selected);
   cards.querySelectorAll("button").forEach(b=>b.disabled=true);feedback.textContent="Правильно!";
   nextTimer=setTimeout(()=>{
    if(index<tasks.length-1){index++;renderTask()}
