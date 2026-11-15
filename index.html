@@ -20,7 +20,7 @@ h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:
 .feedback{min-height:48px;margin:10px 0 0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:750}
 .action{display:none;min-height:54px;padding:12px 28px;border:0;border-radius:17px;background:var(--green);color:white;font:inherit;font-size:18px;font-weight:750;cursor:pointer;touch-action:manipulation}
 .action.visible{display:inline-flex;align-items:center;justify-content:center}
-.test-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.skip-stage{display:block;margin:0 auto 14px;padding:10px 17px;border:1px solid #d8cdbb;border-radius:14px;background:#fffaf1;color:#665d52;font:inherit;font-size:14px;font-weight:650;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px rgb(70 55 35 / 5%)}
+.final-test-button{display:block;margin:0 auto 12px;padding:12px 18px;border:2px solid #b27a35;border-radius:14px;background:#fff0c9;color:#53360e;font:inherit;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgb(70 55 35 / 12%);touch-action:manipulation}.test-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.skip-stage{display:block;margin:0 auto 14px;padding:10px 17px;border:1px solid #d8cdbb;border-radius:14px;background:#fffaf1;color:#665d52;font:inherit;font-size:14px;font-weight:650;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px rgb(70 55 35 / 5%)}
 .skip-stage:focus-visible{outline:3px solid #6b9fc3;outline-offset:2px;border-radius:8px}
 .finish-mark{width:min(100%,440px);margin:0 auto 14px}.finish-mark img{display:block;width:100%;height:auto;border-radius:24px}
 .finish h1{margin-bottom:12px}.finish p{margin:0 0 20px;color:var(--muted);font-size:18px}
@@ -37,6 +37,7 @@ h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:
 <main>
 <section id="game" aria-labelledby="prompt">
 <div class="topline" id="progress">Этап 1 · Задание 1 из 10</div>
+<button class="final-test-button" id="alwaysSkipFinish" type="button">ТЕСТ: сразу к финалу →</button>
 <h1 id="prompt">Найди корабль</h1>
 <div class="test-controls"><button class="skip-stage" id="skipStage" type="button">Перейти сразу к этапу 2 →</button><button class="skip-stage" id="skipFinish" type="button">Проверить финал с GIF →</button></div>
 <div class="cards" id="cards" aria-label="Выбери картинку"></div>
@@ -127,7 +128,8 @@ function choose(button,selected,answer){
  }
 }
 document.getElementById("startSecond").addEventListener("click",()=>{stage=2;index=0;between.hidden=true;game.hidden=false;renderTask()});
-skipStage.addEventListener("click",()=>{stage=2;index=0;game.hidden=false;between.hidden=true;renderTask()});\nfunction showFinish(){clearTimeout(wrongTimer);clearTimeout(nextTimer);game.hidden=true;between.hidden=true;finish.hidden=false;}\nskipFinish.addEventListener("click",showFinish);\ndocument.getElementById("skipFinishBetween").addEventListener("click",showFinish);
+skipStage.addEventListener("click",()=>{stage=2;index=0;game.hidden=false;between.hidden=true;renderTask()});\nfunction showFinish(){clearTimeout(wrongTimer);clearTimeout(nextTimer);game.hidden=true;between.hidden=true;finish.hidden=false;}\nskipFinish.addEventListener("click",showFinish);
+document.getElementById("alwaysSkipFinish").addEventListener("click",showFinish);\ndocument.getElementById("skipFinishBetween").addEventListener("click",showFinish);
 document.getElementById("restart").addEventListener("click",()=>{stage=1;index=0;finish.hidden=true;game.hidden=false;renderTask()});
 renderTask();
 </script>
