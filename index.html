@@ -48,7 +48,7 @@ h1{margin:0 0 clamp(14px,3vh,25px);font-size:clamp(29px,7.5vw,42px);line-height:
 <button class="action visible" id="startSecond" type="button">Начать второй этап</button>
 </section>
 <section class="finish" id="finish" hidden>
-<div class="finish-mark"><img src="animal_applause.svg" alt="Медведь, зайчик и лисёнок хлопают"></div>
+<div class="finish-mark"><img src="animal_applause.jpg" alt="Фотореалистичные медвежонок, зайчик и лисёнок аплодируют"></div>
 <h1>Ура! Ты всё нашёл!</h1>
 <p>Зверята аплодируют тебе!</p>
 <button class="action visible" id="restart" type="button">Сыграть ещё</button>
@@ -70,7 +70,32 @@ const tasks=[
 const allVehicles=["ship","helicopter","dump_truck","train","tractor","excavator","airplane","bus","fire_engine","police_car","van","hot_air_balloon"];
 const game=document.getElementById("game"),between=document.getElementById("between"),finish=document.getElementById("finish");
 const progress=document.getElementById("progress"),prompt=document.getElementById("prompt"),cards=document.getElementById("cards"),feedback=document.getElementById("feedback"),skipStage=document.getElementById("skipStage");
-let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null;
+let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null,audioCtx=null;
+function playVehicleSound(vehicle){
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+  if(!audioCtx)audioCtx=new Ctx();if(audioCtx.state==="suspended")audioCtx.resume();
+  const now=audioCtx.currentTime;
+  function tone(freq,start,duration,wave="sine",endFreq=null,gain=.12){
+   const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=wave;
+   o.frequency.setValueAtTime(freq,now+start);if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,now+start+duration);
+   g.gain.setValueAtTime(.001,now+start);g.gain.exponentialRampToValueAtTime(gain,now+start+.025);g.gain.exponentialRampToValueAtTime(.001,now+start+duration);
+   o.connect(g);g.connect(audioCtx.destination);o.start(now+start);o.stop(now+start+duration+.03);
+  }
+  const beep=(freq,start,d=.16)=>tone(freq,start,d,"square",null,.07);
+  switch(vehicle){
+   case "airplane": tone(520,0,.75,"sawtooth",210,.045);break;
+   case "bus": case "van": beep(740,0,.13);beep(740,.22,.13);break;
+   case "train": tone(620,0,.22,"sawtooth",480,.09);tone(620,.32,.22,"sawtooth",480,.09);break;
+   case "helicopter": for(let i=0;i<5;i++)tone(170,i*.12,.09,"square",125,.055);break;
+   case "ship": tone(190,0,.85,"triangle",145,.16);break;
+   case "fire_engine": case "police_car": tone(620,0,.24,"sawtooth",880,.08);tone(880,.26,.24,"sawtooth",620,.08);tone(620,.52,.24,"sawtooth",880,.08);break;
+   case "dump_truck": case "tractor": tone(115,0,.5,"sawtooth",85,.12);beep(680,.58,.12);beep(680,.78,.12);break;
+   case "excavator": tone(130,0,.32,"sawtooth",100,.1);tone(180,.38,.2,"square",140,.055);break;
+   case "hot_air_balloon": tone(480,0,.5,"sine",700,.06);break;
+  }
+ }catch(e){}
+}
 function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function optionsFor(task){if(stage===1)return shuffle(task.pair);const extras=shuffle(allVehicles.filter(v=>v!==task.answer&&!task.pair.includes(v))).slice(0,2);return shuffle([task.answer,...task.pair.filter(v=>v!==task.answer),...extras])}
 function renderTask(){
@@ -88,7 +113,7 @@ function renderTask(){
 function choose(button,selected,answer){
  if(locked)return;
  if(selected===answer){
-  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");
+  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");playVehicleSound(selected);
   cards.querySelectorAll("button").forEach(b=>b.disabled=true);feedback.textContent="Правильно!";
   nextTimer=setTimeout(()=>{
    if(index<tasks.length-1){index++;renderTask()}
