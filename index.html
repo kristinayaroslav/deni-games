@@ -71,10 +71,11 @@ const allVehicles=["ship","helicopter","dump_truck","train","tractor","excavator
 const game=document.getElementById("game"),between=document.getElementById("between"),finish=document.getElementById("finish");
 const progress=document.getElementById("progress"),prompt=document.getElementById("prompt"),cards=document.getElementById("cards"),feedback=document.getElementById("feedback"),skipStage=document.getElementById("skipStage");
 let stage=1,index=0,locked=false,wrongTimer=null,nextTimer=null,audioCtx=null;
-function playVehicleSound(vehicle){
+async function playVehicleSound(vehicle){
  try{
   const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
-  if(!audioCtx)audioCtx=new Ctx();if(audioCtx.state==="suspended")audioCtx.resume();
+  if(!audioCtx)audioCtx=new Ctx();
+  if(audioCtx.state!=="running")await audioCtx.resume();
   const now=audioCtx.currentTime;
   function tone(freq,start,duration,wave="sine",endFreq=null,gain=.12){
    const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=wave;
@@ -113,7 +114,7 @@ function renderTask(){
 function choose(button,selected,answer){
  if(locked)return;
  if(selected===answer){
-  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");playVehicleSound(selected);
+  locked=true;clearTimeout(wrongTimer);button.classList.add("correct");void playVehicleSound(selected);
   cards.querySelectorAll("button").forEach(b=>b.disabled=true);feedback.textContent="Правильно!";
   nextTimer=setTimeout(()=>{
    if(index<tasks.length-1){index++;renderTask()}
